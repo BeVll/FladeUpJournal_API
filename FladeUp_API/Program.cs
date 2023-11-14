@@ -112,7 +112,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+
 
 var dir = Path.Combine(Directory.GetCurrentDirectory(), "images");
 if (!Directory.Exists(dir))

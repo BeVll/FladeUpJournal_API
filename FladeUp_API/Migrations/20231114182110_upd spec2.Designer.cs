@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using FladeUp_Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FladeUp_API.Migrations
 {
     [DbContext(typeof(AppEFContext))]
-    partial class AppEFContextModelSnapshot : ModelSnapshot
+    [Migration("20231114182110_upd spec2")]
+    partial class updspec2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -68,7 +71,7 @@ namespace FladeUp_API.Migrations
                     b.ToTable("Courses");
                 });
 
-            modelBuilder.Entity("FladeUp_API.Data.Entities.DepartmentEntity", b =>
+            modelBuilder.Entity("FladeUp_API.Data.Entities.DepartamentEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -582,7 +585,7 @@ namespace FladeUp_API.Migrations
 
             modelBuilder.Entity("FladeUp_API.Data.Entities.CourseEntity", b =>
                 {
-                    b.HasOne("FladeUp_API.Data.Entities.DepartmentEntity", "Departament")
+                    b.HasOne("FladeUp_API.Data.Entities.DepartamentEntity", "Departament")
                         .WithMany()
                         .HasForeignKey("DepartamentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -591,7 +594,7 @@ namespace FladeUp_API.Migrations
                     b.Navigation("Departament");
                 });
 
-            modelBuilder.Entity("FladeUp_API.Data.Entities.DepartmentEntity", b =>
+            modelBuilder.Entity("FladeUp_API.Data.Entities.DepartamentEntity", b =>
                 {
                     b.HasOne("FladeUp_Api.Data.Entities.Identity.UserEntity", "Dean")
                         .WithMany()
@@ -604,13 +607,13 @@ namespace FladeUp_API.Migrations
 
             modelBuilder.Entity("FladeUp_API.Data.Entities.SpecializationEntity", b =>
                 {
-                    b.HasOne("FladeUp_API.Data.Entities.DepartmentEntity", "Department")
+                    b.HasOne("FladeUp_API.Data.Entities.DepartamentEntity", "Departament")
                         .WithMany()
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Department");
+                    b.Navigation("Departament");
                 });
 
             modelBuilder.Entity("FladeUp_API.Data.Entities.UserGroup", b =>

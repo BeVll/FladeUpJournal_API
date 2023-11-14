@@ -48,6 +48,27 @@ namespace FladeUp_Api.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpGet("allUsers")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            try
+            {
+                var users = _appEFContext.Users.ToList();
+                List<UserModel> resultUsers = new List<UserModel>();
+
+                foreach (var item in users)
+                {
+                    resultUsers.Add(_mapper.Map<UserModel>(item));
+                }
+
+                return Ok(resultUsers);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
         [Authorize]
         [HttpGet("userProfile")]
         public async Task<IActionResult> GetUserProfile()
