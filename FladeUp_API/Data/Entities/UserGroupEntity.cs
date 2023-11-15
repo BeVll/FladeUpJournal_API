@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FladeUp_API.Data.Entities
 {
-    public class UserGroup
+    public class UserGroupEntity
     {
         public int Id { get; set; }
 
@@ -15,7 +15,7 @@ namespace FladeUp_API.Data.Entities
         public int GroupId { get; set; }
         public virtual GroupEntity Group { get; set; }
 
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedAt { get; set; }
     }
 }

@@ -1,11 +1,11 @@
 ﻿using FladeUp_Api.Data.Entities.Identity;
 using System.ComponentModel.DataAnnotations;
 
-namespace FladeUp_Api.Models
+namespace FladeUp_API.Models.User
 {
     public class UserModel
     {
-        public int Id { get; set; } 
+        public int Id { get; set; }
         public string Firstname { get; set; }
         public string Lastname { get; set; }
         public string Image { get; set; }

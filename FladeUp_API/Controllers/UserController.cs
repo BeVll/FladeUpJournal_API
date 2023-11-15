@@ -7,11 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 using FladeUp_Api.Constants;
 using FladeUp_Api.Requests;
 using Google.Apis.Auth;
-using FladeUp_Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using static Google.Apis.Requests.BatchRequest;
+using FladeUp_API.Models.User;
 
 namespace FladeUp_Api.Controllers
 {

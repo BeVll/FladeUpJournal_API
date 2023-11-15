@@ -7,11 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 using FladeUp_Api.Constants;
 using FladeUp_Api.Requests;
 using Google.Apis.Auth;
-using FladeUp_Api.Models;
 using FladeUp_API.Models;
 using FladeUp_API.Requests.Departament;
 using FladeUp_API.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using FladeUp_API.Models.Specialization;
 
 namespace FladeUp_Api.Controllers
 {
@@ -54,7 +54,10 @@ namespace FladeUp_Api.Controllers
         {
             try
             {
-                var departaments = _mapper.Map<DepartmentModel>(_appEFContext.Departaments.ToList());
+                var departaments = _appEFContext.Departaments
+                   .Include(s => s.Dean)
+                   .Select(s => _mapper.Map<DepartmentModel>(s))
+                   .ToList();
                 return Ok(departaments);
 
             }

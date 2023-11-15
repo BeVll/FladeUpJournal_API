@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using FladeUp_Api.Constants;
 using FladeUp_Api.Requests;
 using Google.Apis.Auth;
-using FladeUp_Api.Models;
 using FladeUp_API.Models;
 using FladeUp_API.Requests.Departament;
 using FladeUp_API.Data.Entities;
@@ -60,13 +59,13 @@ namespace FladeUp_Api.Controllers
         {
             try
             {
-                var departaments = _appEFContext.Specializations
+                var specializations = _appEFContext.Specializations
                     .Include(s => s.Department)
                     .Include(s => s.Department.Dean)
                     .Select(s => _mapper.Map<SpecializationModel>(s))
                     .ToList();
 
-                return Ok(departaments);
+                return Ok(specializations);
 
             }
             catch (Exception ex)
@@ -102,23 +101,27 @@ namespace FladeUp_Api.Controllers
         }
 
         [HttpPut("update/{id}")]
-        public async Task<IActionResult> Update([FromForm] DepartmentCreateRequest model, int id)
+        public async Task<IActionResult> Update([FromForm] SpecializationUpdateRequest model, int id)
         {
             try
             {
-                var departament = await _appEFContext.Departaments.Include(d => d.Dean).Where(d => d.Id == id).SingleOrDefaultAsync();
+                var specialization = await _appEFContext.Specializations
+                    .Include(d => d.Department)
+                    .Include(d => d.Department.Dean)
+                    .Where(d => d.Id == id)
+                    .SingleOrDefaultAsync();
 
-                if(departament == null)
+                if(specialization == null)
                     return BadRequest(NotFound());
 
-                departament.Name = model.Name;
-                departament.DeanId = model.DeanId;
-                departament.UpdatedAt = DateTime.UtcNow;
+                specialization.Name = model.Name;
+                specialization.DepartmentId = model.DepartamentId;
+                specialization.UpdatedAt = DateTime.UtcNow;
 
-                _appEFContext.Update(departament);
+                _appEFContext.Update(specialization);
                 await _appEFContext.SaveChangesAsync();
 
-                var result = _mapper.Map<DepartmentModel>(departament);
+                var result = _mapper.Map<SpecializationModel>(specialization);
                 return Ok(result);
 
             }

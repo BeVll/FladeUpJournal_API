@@ -8,17 +8,17 @@ namespace FladeUp_API.Data.Entities
         public string Name { get; set; }
         public string ShortName { get; set; }
 
-        [ForeignKey("Department")]
-        public int DepartmentId { get; set; }
-        public virtual DepartmentEntity Departament { get; set; }
+        [ForeignKey("Specialization")]
+        public int SpecilizationId { get; set; }
+        public virtual SpecializationEntity Specialization { get; set; }
 
         public string TypeOfCourse { get; set; }
 
         public DateOnly DateOfStart { get; set; }
         public DateOnly DateOfEnd { get; set; }
 
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedAt { get; set; }
 
     }
 }
