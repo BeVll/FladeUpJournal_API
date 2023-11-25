@@ -1,6 +1,7 @@
 ﻿using FladeUp_Api.Data.Entities;
 using FladeUp_Api.Data.Entities.Identity;
 using FladeUp_API.Data.Entities;
+using FladeUp_API.Data.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -20,12 +21,12 @@ namespace FladeUp_Api.Data
             
         }
 
-        public DbSet<GroupEntity> Groups { get; set; }
-        public DbSet<UserGroupEntity> UserGroups { get; set; }
-        public DbSet<DepartmentEntity> Departaments { get; set; }
-        public DbSet<CourseEntity> Courses { get; set; }
-        public DbSet<SpecializationEntity> Specializations { get; set; }
+        public DbSet<ClassEntity> Classes { get; set; }
+        public DbSet<UserClassEntity> UserClasses { get; set; }
+        public DbSet<UserAdresses> UserAdresses { get; set; }
 
+        public DbSet<SubjectEnitity> Subjects { get; set; }
+        public DbSet<ClassSubjectsEnitity> ClassSubjects { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

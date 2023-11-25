@@ -32,19 +32,6 @@ namespace FladeUp_API.Models.User
         public string? MailStreet { get; set; }
         public string? MailPostalCode { get; set; }
 
-        public string? MatureCerfiticate { get; set; }
-        public DateOnly? ReleaseDateSchool { get; set; }
-        public int? TerminationYearSchool { get; set; }
-        public string? SchoolName { get; set; }
-        public string? TypeOfExam { get; set; }
-
-        public string? Diplom { get; set; }
-        public DateOnly? ReleaseDateUniver { get; set; }
-        public int? TerminationYearUniver { get; set; }
-        public string? UniversityName { get; set; }
-        public string? Subspecialization { get; set; }
-        public string? Specialization { get; set; }
-
         public string? WorkExp { get; set; }
         public virtual ICollection<UserRoleEntity> UserRoles { get; set; }
     }

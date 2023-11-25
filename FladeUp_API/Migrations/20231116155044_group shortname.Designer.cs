@@ -3,6 +3,7 @@ using System;
 using FladeUp_Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FladeUp_API.Migrations
 {
     [DbContext(typeof(AppEFContext))]
-    partial class AppEFContextModelSnapshot : ModelSnapshot
+    [Migration("20231116155044_group shortname")]
+    partial class groupshortname
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +25,7 @@ namespace FladeUp_API.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("FladeUp_API.Data.Entities.ClassEntity", b =>
+            modelBuilder.Entity("FladeUp_API.Data.Entities.CourseEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -30,8 +33,75 @@ namespace FladeUp_API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ClassSpecialization")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateOnly>("DateOfEnd")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("DateOfStart")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("ShortName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("SpecilizationId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TypeOfCourse")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SpecilizationId");
+
+                    b.ToTable("Courses");
+                });
+
+            modelBuilder.Entity("FladeUp_API.Data.Entities.DepartmentEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DeanId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeanId");
+
+                    b.ToTable("Departaments");
+                });
+
+            modelBuilder.Entity("FladeUp_API.Data.Entities.GroupEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -51,18 +121,12 @@ namespace FladeUp_API.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("YearOfEnd")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("YearOfStart")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
-                    b.ToTable("Classes");
+                    b.ToTable("Groups");
                 });
 
-            modelBuilder.Entity("FladeUp_API.Data.Entities.ClassSubjectsEnitity", b =>
+            modelBuilder.Entity("FladeUp_API.Data.Entities.SpecializationEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -70,87 +134,11 @@ namespace FladeUp_API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ClassId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
-                    b.Property<int>("SubjectId")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("TeacherId")
-                        .IsRequired()
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClassId");
-
-                    b.HasIndex("SubjectId");
-
-                    b.HasIndex("TeacherId");
-
-                    b.ToTable("ClassSubjects");
-                });
-
-            modelBuilder.Entity("FladeUp_API.Data.Entities.Identity.UserAdresses", b =>
-                {
-                    b.Property<int>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserId"));
-
-                    b.Property<string>("City")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Country")
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("MailCity")
-                        .HasColumnType("text");
-
-                    b.Property<string>("MailCountry")
-                        .HasColumnType("text");
-
-                    b.Property<string>("MailPostalCode")
-                        .HasColumnType("text");
-
-                    b.Property<string>("MailStreet")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PostalCode")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Street")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("UserId");
-
-                    b.ToTable("UserAdresses");
-                });
-
-            modelBuilder.Entity("FladeUp_API.Data.Entities.SubjectEnitity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("DepartmentId")
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Color")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -161,10 +149,12 @@ namespace FladeUp_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Subjects");
+                    b.HasIndex("DepartmentId");
+
+                    b.ToTable("Specializations");
                 });
 
-            modelBuilder.Entity("FladeUp_API.Data.Entities.UserClassEntity", b =>
+            modelBuilder.Entity("FladeUp_API.Data.Entities.UserGroupEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -172,11 +162,11 @@ namespace FladeUp_API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ClassId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -186,11 +176,11 @@ namespace FladeUp_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClassId");
+                    b.HasIndex("GroupId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserClasses");
+                    b.ToTable("UserGroups");
                 });
 
             modelBuilder.Entity("FladeUp_Api.Data.Entities.Identity.RoleEntity", b =>
@@ -236,8 +226,14 @@ namespace FladeUp_API.Migrations
                     b.Property<string>("BankAccount")
                         .HasColumnType("text");
 
+                    b.Property<string>("City")
+                        .HasColumnType("text");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Country")
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
@@ -245,6 +241,9 @@ namespace FladeUp_API.Migrations
 
                     b.Property<DateOnly>("DateOfBirth")
                         .HasColumnType("date");
+
+                    b.Property<string>("Diplom")
+                        .HasColumnType("text");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -282,6 +281,21 @@ namespace FladeUp_API.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("MailCity")
+                        .HasColumnType("text");
+
+                    b.Property<string>("MailCountry")
+                        .HasColumnType("text");
+
+                    b.Property<string>("MailPostalCode")
+                        .HasColumnType("text");
+
+                    b.Property<string>("MailStreet")
+                        .HasColumnType("text");
+
+                    b.Property<string>("MatureCerfiticate")
+                        .HasColumnType("text");
+
                     b.Property<string>("National")
                         .IsRequired()
                         .HasColumnType("text");
@@ -310,6 +324,18 @@ namespace FladeUp_API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("PostalCode")
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly?>("ReleaseDateSchool")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("ReleaseDateUniver")
+                        .HasColumnType("date");
+
+                    b.Property<string>("SchoolName")
+                        .HasColumnType("text");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
@@ -317,9 +343,24 @@ namespace FladeUp_API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Specialization")
+                        .HasColumnType("text");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("Street")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Subspecialization")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("TerminationYearSchool")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("TerminationYearUniver")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Twitter")
                         .HasColumnType("text");
@@ -327,7 +368,13 @@ namespace FladeUp_API.Migrations
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<string>("TypeOfExam")
+                        .HasColumnType("text");
+
+                    b.Property<string>("UniversityName")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserName")
@@ -456,38 +503,44 @@ namespace FladeUp_API.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("FladeUp_API.Data.Entities.ClassSubjectsEnitity", b =>
+            modelBuilder.Entity("FladeUp_API.Data.Entities.CourseEntity", b =>
                 {
-                    b.HasOne("FladeUp_API.Data.Entities.ClassEntity", "Class")
+                    b.HasOne("FladeUp_API.Data.Entities.SpecializationEntity", "Specialization")
                         .WithMany()
-                        .HasForeignKey("ClassId")
+                        .HasForeignKey("SpecilizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FladeUp_API.Data.Entities.SubjectEnitity", "Subject")
-                        .WithMany()
-                        .HasForeignKey("SubjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FladeUp_Api.Data.Entities.Identity.UserEntity", "Teacher")
-                        .WithMany()
-                        .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Class");
-
-                    b.Navigation("Subject");
-
-                    b.Navigation("Teacher");
+                    b.Navigation("Specialization");
                 });
 
-            modelBuilder.Entity("FladeUp_API.Data.Entities.UserClassEntity", b =>
+            modelBuilder.Entity("FladeUp_API.Data.Entities.DepartmentEntity", b =>
                 {
-                    b.HasOne("FladeUp_API.Data.Entities.ClassEntity", "Class")
+                    b.HasOne("FladeUp_Api.Data.Entities.Identity.UserEntity", "Dean")
                         .WithMany()
-                        .HasForeignKey("ClassId")
+                        .HasForeignKey("DeanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Dean");
+                });
+
+            modelBuilder.Entity("FladeUp_API.Data.Entities.SpecializationEntity", b =>
+                {
+                    b.HasOne("FladeUp_API.Data.Entities.DepartmentEntity", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+                });
+
+            modelBuilder.Entity("FladeUp_API.Data.Entities.UserGroupEntity", b =>
+                {
+                    b.HasOne("FladeUp_API.Data.Entities.GroupEntity", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -497,7 +550,7 @@ namespace FladeUp_API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Class");
+                    b.Navigation("Group");
 
                     b.Navigation("User");
                 });

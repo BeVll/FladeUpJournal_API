@@ -5,11 +5,15 @@
         public static List<string> All = new()
         {
             Admin,
-            User,
-            Moderator
+            Student,
+            Dean,
+            Teacher,
+            Rector
         };
         public const string Admin = "Admin";
-        public const string User = "User";
-        public const string Moderator = "Moderator";
+        public const string Student = "Student";
+        public const string Dean = "Dean";
+        public const string Teacher = "Teacher";
+        public const string Rector = "Rector";
     }
 }

@@ -12,6 +12,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using static Google.Apis.Requests.BatchRequest;
 using FladeUp_API.Models.User;
+using FladeUp_API.Models.Subject;
+using FladeUp_API.Models.Class;
 
 namespace FladeUp_Api.Controllers
 {
@@ -78,8 +80,92 @@ namespace FladeUp_Api.Controllers
                 var email = User.FindFirst(ClaimTypes.Email).Value;
                 var user = await _userManager.Users.SingleOrDefaultAsync(u => u.Email == email);
 
+              
+
                 if (user != null)
-                    return Ok(_mapper.Map<UserModel>(user));
+                {
+                    var userModel = _mapper.Map<UserModel>(user);
+
+                    var adresses = await _appEFContext.UserAdresses.Where(a => a.UserId == user.Id).SingleOrDefaultAsync();
+
+                    if(adresses != null)
+                    {
+                        userModel.Country = adresses.Country;
+                        userModel.City = adresses.City;
+                        userModel.Street = adresses.Street;
+                        userModel.PostalCode = adresses.PostalCode;
+
+                        userModel.MailCountry = adresses.MailCountry;
+                        userModel.MailCity = adresses.MailCity;
+                        userModel.MailStreet = adresses.MailStreet;
+                        userModel.MailPostalCode = adresses.MailPostalCode;
+                    }
+
+                    
+
+                    return Ok(userModel);
+                }
+                   
+
+                else
+                    return BadRequest();
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpGet("getClasses")]
+        public async Task<IActionResult> GetClasses()
+        {
+            try
+            {
+                var email = User.FindFirst(ClaimTypes.Email).Value;
+                var user = await _userManager.Users.SingleOrDefaultAsync(u => u.Email == email);
+
+
+
+                if (user != null)
+                {
+                    var classes = await _appEFContext.UserClasses
+                        .Where(c => c.UserId == user.Id)
+                        .Include(c => c.Class)
+                        .Select(c => _mapper.Map<ClassModel>(c))
+                        .ToListAsync();
+
+                    foreach (var classEntity in classes)
+                    {
+
+                        var subjects = await _appEFContext.ClassSubjects
+                       .Where(s => s.ClassId == classEntity.Id)
+                       .Include(s => s.Subject)
+                       .Include(s => s.Teacher)
+                       .ToListAsync();
+
+                        var result = new List<SubjectModel>();
+
+                        foreach (var item in subjects)
+                        {
+                            result.Add(new SubjectModel
+                            {
+                                Id = item.SubjectId,
+                                Name = item.Subject.Name,
+                                Teacher = _mapper.Map<UserPublicDataModel>(item.Teacher),
+                                Description = item.Description,
+                                Color = item.Subject.Color,
+                            });
+                        }
+
+
+                        classEntity.Subjects = result;
+                    }
+
+                    return Ok(classes);
+                }
+
 
                 else
                     return BadRequest();

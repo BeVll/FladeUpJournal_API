@@ -54,19 +54,19 @@ namespace FladeUp_Api.Controllers
                     string fileName = null;
                     string extension = ".png";
 
-        var newUser = new UserEntity()
+                    var newUser = new UserEntity()
                         {
-            Firstname = model.Firstname,
-            Lastname = model.Lastname,
-            Email = model.Email,
-            UserName = model.Email,
+                            Firstname = model.Firstname,
+                            Lastname = model.Lastname,
+                            Email = model.Email,
+                            UserName = model.Email,
                             Image = null,
-            IndetificateCode = model.IndetificateCode,
-            PlaceOfBirth = model.PlaceOfBirth,
-            Sex = model.Sex,
-            National = model.National,
-            Passport = model.Passport,
-            IsLightTheme = false,
+                            IndetificateCode = model.IndetificateCode,
+                            PlaceOfBirth = model.PlaceOfBirth,
+                            Sex = model.Sex,
+                            National = model.National,
+                            Passport = model.Passport,
+                            IsLightTheme = false,
                             Instagram = null,
                             Facebook = null,
                             Twitter = null,
@@ -74,15 +74,18 @@ namespace FladeUp_Api.Controllers
                             CreatedAt = DateTime.UtcNow,
                             DateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow),
                         };
-                        var result = await _userManager.CreateAsync(newUser);
+
+                    var result = await _userManager.CreateAsync(newUser);
                         
+
+
                     if (result.Succeeded)
                     {
                             var id = await _userManager.GetUserIdAsync(newUser);
                             await _userManager.AddPasswordAsync(newUser, model.Password);
                             await _userManager.UpdateAsync(newUser);
                             
-                            result = await _userManager.AddToRoleAsync(newUser, Roles.User);
+                            result = await _userManager.AddToRoleAsync(newUser, Roles.Student);
                             token = await _jwtTokenService.CreateToken(newUser);
                        
                         var confirmToken = _userManager.GenerateEmailConfirmationTokenAsync(newUser);
