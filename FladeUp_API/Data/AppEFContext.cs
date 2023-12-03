@@ -27,6 +27,10 @@ namespace FladeUp_Api.Data
 
         public DbSet<SubjectEnitity> Subjects { get; set; }
         public DbSet<ClassSubjectsEnitity> ClassSubjects { get; set; }
+
+        public DbSet<RoomEntity> Rooms { get; set; }
+        public DbSet<EventEnitity> Events { get; set; }
+        public DbSet<EventClassesEntity> EventClasses { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

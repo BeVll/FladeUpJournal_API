@@ -133,7 +133,7 @@ namespace FladeUp_Api.Controllers
                     var classes = await _appEFContext.UserClasses
                         .Where(c => c.UserId == user.Id)
                         .Include(c => c.Class)
-                        .Select(c => _mapper.Map<ClassModel>(c))
+                        .Select(c => _mapper.Map<ClassModel>(c.Class))
                         .ToListAsync();
 
                     foreach (var classEntity in classes)
@@ -176,6 +176,8 @@ namespace FladeUp_Api.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+
 
         [Authorize]
         [HttpGet()]

@@ -3,6 +3,7 @@ using System;
 using FladeUp_Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FladeUp_API.Migrations
 {
     [DbContext(typeof(AppEFContext))]
-    partial class AppEFContextModelSnapshot : ModelSnapshot
+    [Migration("20231202135335_event")]
+    partial class @event
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -94,27 +97,6 @@ namespace FladeUp_API.Migrations
                     b.ToTable("ClassSubjects");
                 });
 
-            modelBuilder.Entity("FladeUp_API.Data.Entities.EventClassesEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ClassId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("EventId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClassId");
-
-                    b.ToTable("EventClasses");
-                });
-
             modelBuilder.Entity("FladeUp_API.Data.Entities.EventEnitity", b =>
                 {
                     b.Property<int>("Id")
@@ -126,38 +108,11 @@ namespace FladeUp_API.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("EndDateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsCanceled")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsOnline")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("RoomId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("StartDateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("SubjectId")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("TeacherId")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("RoomId");
-
-                    b.HasIndex("SubjectId");
-
-                    b.HasIndex("TeacherId");
 
                     b.ToTable("Events");
                 });
@@ -565,38 +520,6 @@ namespace FladeUp_API.Migrations
                         .IsRequired();
 
                     b.Navigation("Class");
-
-                    b.Navigation("Subject");
-
-                    b.Navigation("Teacher");
-                });
-
-            modelBuilder.Entity("FladeUp_API.Data.Entities.EventClassesEntity", b =>
-                {
-                    b.HasOne("FladeUp_API.Data.Entities.ClassEntity", "Class")
-                        .WithMany()
-                        .HasForeignKey("ClassId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Class");
-                });
-
-            modelBuilder.Entity("FladeUp_API.Data.Entities.EventEnitity", b =>
-                {
-                    b.HasOne("FladeUp_API.Data.Entities.RoomEntity", "Room")
-                        .WithMany()
-                        .HasForeignKey("RoomId");
-
-                    b.HasOne("FladeUp_API.Data.Entities.SubjectEnitity", "Subject")
-                        .WithMany()
-                        .HasForeignKey("SubjectId");
-
-                    b.HasOne("FladeUp_Api.Data.Entities.Identity.UserEntity", "Teacher")
-                        .WithMany()
-                        .HasForeignKey("TeacherId");
-
-                    b.Navigation("Room");
 
                     b.Navigation("Subject");
 

@@ -10,6 +10,8 @@ namespace FladeUp_API.Models.Class
         public string Name { get; set; }
         public string ShortName { get; set; }
         public string FormOfStudy { get; set; }
+        public int YearOfStart { get; set; }
+        public int YearOfEnd { get; set; }
         public List<UserPublicDataModel>? Students { get; set; }
 
         public List<SubjectModel>? Subjects { get; set; }

@@ -44,7 +44,11 @@ namespace FladeUp_API.Controllers
                     .Where(u => u.Id == id)
                     .SingleOrDefault());
 
-                classModel.Students = await _appEFContext.UserClasses.Include(u => u.User).Where(u => u.ClassId == id).Select(u => _mapper.Map<UserPublicDataModel>(u)).ToListAsync();
+                classModel.Students = await _appEFContext.UserClasses
+                    .Include(u => u.User)
+                    .Where(u => u.ClassId == id)
+                    .Select(u => _mapper.Map<UserPublicDataModel>(u))
+                    .ToListAsync();
 
                 return Ok(classModel);
 
