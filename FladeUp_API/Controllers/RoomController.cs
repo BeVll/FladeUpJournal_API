@@ -1,17 +1,16 @@
 ﻿using AutoMapper;
-using AutoMapper;
 using FladeUp_Api.Data.Entities.Identity;
+using FladeUp_API.Data.Entities;
 using FladeUp_Api.Data;
 using FladeUp_Api.Interfaces;
+using FladeUp_API.Models.Class;
+using FladeUp_API.Models.Event;
+using FladeUp_API.Models.User;
+using FladeUp_API.Requests.Event;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using FladeUp_API.Data.Entities;
+using FladeUp_API.Requests.Room;
 using Microsoft.EntityFrameworkCore;
-using FladeUp_API.Models.Class;
-using FladeUp_API.Models.User;
-using FladeUp_API.Requests.Class;
-using FladeUp_API.Requests.Subject;
-
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -19,16 +18,15 @@ namespace FladeUp_API.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class SubjectController : ControllerBase
+    public class RoomController : ControllerBase
     {
-        // GET: api/<SubjectController>
         private readonly UserManager<UserEntity> _userManager;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IMapper _mapper;
         private readonly AppEFContext _appEFContext;
         private readonly ICloudStorageService _cloudStorage;
 
-        public SubjectController(UserManager<UserEntity> userManager, IJwtTokenService jwtTokenService, IMapper mapper, AppEFContext appEFContext, ICloudStorageService cloudStorage)
+        public RoomController(UserManager<UserEntity> userManager, IJwtTokenService jwtTokenService, IMapper mapper, AppEFContext appEFContext, ICloudStorageService cloudStorage)
         {
             _userManager = userManager;
             _jwtTokenService = jwtTokenService;
@@ -42,11 +40,15 @@ namespace FladeUp_API.Controllers
         {
             try
             {
-                var subject = _appEFContext.Subjects
+                var room = _appEFContext.Rooms
                     .Where(u => u.Id == id)
                     .SingleOrDefault();
 
-                return Ok(subject);
+                if (room == null)
+                    return NotFound();
+
+                
+                return Ok(room);
 
             }
             catch (Exception ex)
@@ -60,63 +62,65 @@ namespace FladeUp_API.Controllers
         {
             try
             {
-                var subjects = await _appEFContext.Subjects
-                    .ToListAsync();
+                var rooms = _appEFContext.Rooms
+                    .ToList();
 
-
-                return Ok(subjects);
-
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        
-        [HttpPost("create")]
-        public async Task<IActionResult> Create([FromForm] SubjectCreateRequest model)
-        {
-            try
-            {
-                var subject = new SubjectEnitity()
-                {
-                    Name = model.Name,
-                    Color = model.Color,
-                };
-                _appEFContext.Add(subject);
-                await _appEFContext.SaveChangesAsync();
-
-                return Ok(subject);
-
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpPut("update")]
-        public async Task<IActionResult> Update([FromForm] SubjectUpdateRequest model)
-        {
-            try
-            {
-                var subject = await _appEFContext.Subjects
-                     .Where(r => r.Id == model.Id)
-                     .SingleOrDefaultAsync();
-
-                if (subject == null)
+                if (rooms == null)
                     return NotFound();
 
-                subject.Name = model.Name;
-                subject.Color = model.Color;
 
-                _appEFContext.Update(subject);
+                return Ok(rooms);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("create")]
+        public async Task<IActionResult> Create([FromForm] RoomCreateRequest model)
+        {
+            try
+            {
+                RoomEntity room = new RoomEntity()
+                {
+                    Name = model.Name,
+                    Description = model.Description,
+                };
+
+                _appEFContext.Add(room);
                 await _appEFContext.SaveChangesAsync();
 
 
-                return Ok(subject);
+                return Ok(room);
 
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpPut("update")]
+        public async Task<IActionResult> Update([FromForm] RoomUpdateRequest model)
+        {
+            try
+            {
+                var room = await _appEFContext.Rooms
+                    .Where(r => r.Id == model.Id)
+                    .SingleOrDefaultAsync();
+
+                if(room == null)
+                    return NotFound();
+
+                room.Name = model.Name;
+                room.Description = model.Description;
+
+                _appEFContext.Update(room);
+                await _appEFContext.SaveChangesAsync();
+
+
+                return Ok(room);
             }
             catch (Exception ex)
             {
@@ -129,14 +133,14 @@ namespace FladeUp_API.Controllers
         {
             try
             {
-                var subject = await _appEFContext.Subjects
+                var room = await _appEFContext.Rooms
                     .Where(r => r.Id == id)
                     .SingleOrDefaultAsync();
 
-                if (subject == null)
+                if (room == null)
                     return NotFound();
 
-                _appEFContext.Remove(subject);
+                _appEFContext.Remove(room);
                 await _appEFContext.SaveChangesAsync();
 
 

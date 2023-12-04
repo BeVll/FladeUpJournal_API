@@ -183,5 +183,104 @@ namespace FladeUp_API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPut("update")]
+        public async Task<IActionResult> Update([FromForm] EventUpdateRequest model)
+        {
+            try
+            {
+                var eventEntity = await _appEFContext.Events
+                    .Where(e => e.Id == model.Id)
+                    .SingleOrDefaultAsync();
+
+                if (eventEntity == null)
+                    return NotFound();
+
+
+                eventEntity.Name = model.Name;
+                eventEntity.Description = model.Description;
+                eventEntity.StartDateTime = model.StartDateTime;
+                eventEntity.EndDateTime = model.EndDateTime;
+                eventEntity.TeacherId = model.TeacherId;
+                eventEntity.SubjectId = model.SubjectId;
+                eventEntity.RoomId = model.RoomId;
+                eventEntity.IsCanceled = model.IsCanceled;
+                eventEntity.IsOnline = model.IsOnline;
+            
+
+                _appEFContext.Update(eventEntity);
+                await _appEFContext.SaveChangesAsync();
+
+                var classes = _appEFContext.EventClasses.Where(e => e.EventId == eventEntity.Id).ToList();
+                foreach (var item in classes)
+                {
+                    _appEFContext.Remove(item); 
+                }
+
+                if (model.ClassIds.Count() > 0)
+                {
+                    
+                    foreach (var classId in model.ClassIds)
+                    {
+                        
+                        EventClassesEntity eventClass = new EventClassesEntity()
+                        {
+                            ClassId = classId,
+                            EventId = eventEntity.Id,
+                        };
+
+                        _appEFContext.Add(eventClass);
+                    }
+
+                }
+                await _appEFContext.SaveChangesAsync();
+
+
+                var eventModel = _mapper.Map<EventModel>(eventEntity);
+
+                if (eventEntity.Teacher != null)
+                    eventModel.Teacher = _mapper.Map<UserPublicDataModel>(eventEntity.Teacher);
+
+                return Ok(eventModel);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var eventEntity = await _appEFContext.Events
+                    .Where(r => r.Id == id)
+                    .SingleOrDefaultAsync();
+
+                if (eventEntity == null)
+                    return NotFound();
+
+                var eventClasses = await _appEFContext.EventClasses
+                    .Where(e => e.EventId == eventEntity.Id)
+                    .ToListAsync();
+
+                foreach (var eventClass in eventClasses)
+                {
+                    _appEFContext.Remove(eventClass);
+                }
+
+                _appEFContext.Remove(eventEntity);
+                await _appEFContext.SaveChangesAsync();
+
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
