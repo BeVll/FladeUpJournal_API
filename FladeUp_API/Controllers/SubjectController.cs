@@ -11,6 +11,10 @@ using FladeUp_API.Models.Class;
 using FladeUp_API.Models.User;
 using FladeUp_API.Requests.Class;
 using FladeUp_API.Requests.Subject;
+using System.Linq;
+using FladeUp_API.Models;
+using FladeUp_API.Models.Subject;
+using System;
 
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -63,8 +67,45 @@ namespace FladeUp_API.Controllers
                 var subjects = await _appEFContext.Subjects
                     .ToListAsync();
 
+                return Ok(new Response<List<SubjectEnitity>>(subjects));
 
-                return Ok(subjects);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("")]
+        public async Task<IActionResult> GetSubjects([FromQuery] string? searchQuery, [FromQuery] int page, [FromQuery] int pageSize)
+        {
+            try
+            {
+                var subjects = new List<SubjectEnitity>();
+                if(searchQuery != null)
+                {
+                    subjects = await _appEFContext.Subjects
+                    .OrderBy(s => s.Id)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .Where(s => s.Name.ToLower().Contains(searchQuery.ToLower()) || s.Color.ToLower().Contains(searchQuery.ToLower()) || s.Id.ToString() == searchQuery)
+                    .ToListAsync();
+
+                }
+
+                else
+                {
+                    subjects = await _appEFContext.Subjects
+                    .OrderBy(s => s.Id)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+                }
+
+                var totalRecords = await _appEFContext.Subjects.CountAsync();
+                var totalPages = Convert.ToInt32(Math.Ceiling(Convert.ToDecimal(totalRecords) / Convert.ToDecimal(pageSize)));
+
+                return Ok(new PagedResponse<List<SubjectEnitity>>(subjects, page, pageSize, totalPages, totalRecords));
 
             }
             catch (Exception ex)
