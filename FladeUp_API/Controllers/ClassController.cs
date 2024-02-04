@@ -10,6 +10,9 @@ using FladeUp_API.Models.Class;
 using FladeUp_API.Models.User;
 using FladeUp_API.Requests.Class;
 using FladeUp_API.Models.Subject;
+using FladeUp_API.Models;
+using System.Drawing.Printing;
+using Google.Apis.Storage.v1.Data;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -80,11 +83,63 @@ namespace FladeUp_API.Controllers
 
                     }
                 }
-                    
+
+                return Ok(groups);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("")]
+        public async Task<IActionResult> GetClasses([FromQuery] string? searchQuery, [FromQuery] int page, [FromQuery] int pageSize)
+        {
+            try
+            {
+                var groups = new List<ClassModel>();
+
+                if (searchQuery != null)
+                {
+                    groups = await _appEFContext.Classes
+                    .OrderBy(s => s.Id)
+                    .Where(s => s.Name.ToLower().Contains(searchQuery.ToLower()) || s.ShortName.ToLower().Contains(searchQuery.ToLower()) || s.Id.ToString() == searchQuery)
+                    .Select(g => _mapper.Map<ClassModel>(g))
+                    .ToListAsync();
+
+                }
+
+                else
+                {
+                    groups = await _appEFContext.Classes
+                    .OrderBy(s => s.Id)
+                    .Select(g => _mapper.Map<ClassModel>(g))
+                    .ToListAsync();
+                }
+
+                groups = groups.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+                var totalRecords = await _appEFContext.Classes.CountAsync();
+                var totalPages = Convert.ToInt32(Math.Ceiling(Convert.ToDecimal(totalRecords) / Convert.ToDecimal(pageSize)));
 
                 
 
-                return Ok(groups);
+                if (groups != null)
+                {
+                    foreach (ClassModel item in groups)
+                    {
+                        item.Students = await _appEFContext.UserClasses
+                            .Include(u => u.User)
+                            .Where(u => u.ClassId == item.Id)
+                            .Select(u => _mapper.Map<UserPublicDataModel>(u.User))
+                            .ToListAsync();
+
+                    }
+                }
+
+                return Ok(new PagedResponse<List<ClassModel>>(groups, page, pageSize, totalPages, totalRecords));
+
+
+
 
             }
             catch (Exception ex)

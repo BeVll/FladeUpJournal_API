@@ -86,8 +86,6 @@ namespace FladeUp_API.Controllers
                 {
                     subjects = await _appEFContext.Subjects
                     .OrderBy(s => s.Id)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
                     .Where(s => s.Name.ToLower().Contains(searchQuery.ToLower()) || s.Color.ToLower().Contains(searchQuery.ToLower()) || s.Id.ToString() == searchQuery)
                     .ToListAsync();
 
@@ -97,11 +95,9 @@ namespace FladeUp_API.Controllers
                 {
                     subjects = await _appEFContext.Subjects
                     .OrderBy(s => s.Id)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
                     .ToListAsync();
                 }
-
+                subjects = subjects.Skip((page - 1) * pageSize).Take(pageSize).ToList();
                 var totalRecords = await _appEFContext.Subjects.CountAsync();
                 var totalPages = Convert.ToInt32(Math.Ceiling(Convert.ToDecimal(totalRecords) / Convert.ToDecimal(pageSize)));
 
