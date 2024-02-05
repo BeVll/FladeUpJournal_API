@@ -11,7 +11,6 @@ namespace FladeUp_API.Data.Entities
         public string FormOfStudy { get; set; }
         public int YearOfStart { get; set; }
         public int YearOfEnd { get; set; }
-        public string? ClassSpecialization { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
     }

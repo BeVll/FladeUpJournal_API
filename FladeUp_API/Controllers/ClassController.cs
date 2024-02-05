@@ -198,7 +198,6 @@ namespace FladeUp_API.Controllers
                     FormOfStudy = model.FormOfStudy,
                     YearOfStart = model.YearOfStart,
                     YearOfEnd = model.YearOfEnd,
-                    ClassSpecialization = model.ClassSpecialization,
 
                 };
                 _appEFContext.Add(course);
@@ -209,6 +208,64 @@ namespace FladeUp_API.Controllers
                 var result = _mapper.Map<ClassModel>(course);
                 return Ok(result);
 
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("")]
+        public async Task<IActionResult> Update([FromForm] ClassUpdateRequest model)
+        {
+            try
+            {
+                var groupEntity = await _appEFContext.Classes
+                    .Where(e => e.Id == model.Id)
+                    .SingleOrDefaultAsync();
+
+                if (groupEntity == null)
+                    return NotFound();
+
+                groupEntity.Id = model.Id;
+                groupEntity.Name = model.Name;
+                groupEntity.ShortName = model.ShortName;
+                groupEntity.FormOfStudy = model.FormOfStudy;
+                groupEntity.YearOfStart = model.YearOfEnd;
+                groupEntity.UpdatedAt = DateTime.Now;
+
+                _appEFContext.Update(groupEntity);
+                await _appEFContext.SaveChangesAsync();
+
+
+
+                var result = _mapper.Map<ClassModel>(groupEntity);
+                return Ok(result);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var classEntity = await _appEFContext.Classes
+                    .Where(r => r.Id == id)
+                    .SingleOrDefaultAsync();
+
+                if (classEntity == null)
+                    return NotFound();
+
+                _appEFContext.Remove(classEntity);
+                await _appEFContext.SaveChangesAsync();
+
+
+                return Ok();
             }
             catch (Exception ex)
             {
