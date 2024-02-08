@@ -44,7 +44,7 @@ namespace FladeUp_API.Controllers
         {
             try
             {
-                var student = _mapper.Map<StudentModel>(
+                var student = _mapper.Map<StudentDetailModel>(
                     _appEFContext.Users.Where(
                         u => u.Id == id && u.UserRoles.Where(r => r.Role.Name == "Student").FirstOrDefault() != null)
                     .SingleOrDefault());
@@ -136,7 +136,7 @@ namespace FladeUp_API.Controllers
 
                 if (user != null)
                 {
-                    var userModel = _mapper.Map<UserModel>(user);
+                    var userModel = _mapper.Map<StudentDetailModel>(user);
 
                     var adresses = await _appEFContext.UserAdresses.Where(a => a.UserId == user.Id).SingleOrDefaultAsync();
 
@@ -240,7 +240,7 @@ namespace FladeUp_API.Controllers
                 var email = User.FindFirst("Id").Value;
                 var user = await _userManager.Users.SingleOrDefaultAsync(u => u.Id == Convert.ToInt32(email));
 
-                var res = _mapper.Map<UserModel>(_appEFContext.Users.Where(u => u.Id == user.Id).SingleOrDefault());
+                var res = _mapper.Map<StudentDetailModel>(_appEFContext.Users.Where(u => u.Id == user.Id).SingleOrDefault());
                 return Ok(res);
 
             }

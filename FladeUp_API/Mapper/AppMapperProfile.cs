@@ -13,7 +13,7 @@ namespace FladeUp_Api.Mapper
     {
         public AppMapperProfile()
         {
-            CreateMap<UserEntity, UserModel>();
+            CreateMap<UserEntity, StudentDetailModel>();
             CreateMap<UserEntity, StudentModel>();
             CreateMap<UserEntity, UserPublicDataModel>();
             CreateMap<ClassEntity, ClassModel>();
