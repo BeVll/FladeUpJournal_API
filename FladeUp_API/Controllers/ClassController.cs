@@ -93,54 +93,76 @@ namespace FladeUp_API.Controllers
         }
 
         [HttpGet("")]
-        public async Task<IActionResult> GetClasses([FromQuery] string? searchQuery, [FromQuery] int page, [FromQuery] int pageSize)
+        public async Task<IActionResult> GetClasses([FromQuery] string? searchQuery, [FromQuery] string? sortBy, [FromQuery] string? sortDirection, [FromQuery] int page, [FromQuery] int pageSize)
         {
             try
             {
-                var groups = new List<ClassModel>();
+                var classesQuery = _appEFContext.Classes.AsQueryable();
 
-                if (searchQuery != null)
+                if (!string.IsNullOrEmpty(searchQuery))
                 {
-                    groups = await _appEFContext.Classes
-                    .OrderBy(s => s.Id)
-                    .Where(s => s.Name.ToLower().Contains(searchQuery.ToLower()) || s.ShortName.ToLower().Contains(searchQuery.ToLower()) || s.Id.ToString() == searchQuery)
-                    .Select(g => _mapper.Map<ClassModel>(g))
-                    .ToListAsync();
+                    var lowerSearchQuery = searchQuery.ToLower();
 
+                    classesQuery = classesQuery
+                        .Where(s => EF.Functions.Like(s.Name.ToLower(), $"%{lowerSearchQuery}%") ||
+                                    EF.Functions.Like(s.ShortName.ToLower(), $"%{lowerSearchQuery}%") ||
+                                    EF.Functions.Like(s.Id.ToString(), $"%{lowerSearchQuery}%"));
                 }
 
-                else
+                if (!string.IsNullOrEmpty(sortBy))
                 {
-                    groups = await _appEFContext.Classes
-                    .OrderBy(s => s.Id)
-                    .Select(g => _mapper.Map<ClassModel>(g))
-                    .ToListAsync();
+                    switch (sortBy.ToLower())
+                    {
+                        case "name":
+                            if (string.IsNullOrEmpty(sortDirection) || sortDirection.ToLower() == "ascending")
+                                classesQuery = classesQuery.OrderBy(s => s.Name);
+                            else
+                                classesQuery = classesQuery.OrderByDescending(s => s.Name);
+                            break;
+                        case "shortname":
+                            if (string.IsNullOrEmpty(sortDirection) || sortDirection.ToLower() == "ascending")
+                                classesQuery = classesQuery.OrderBy(s => s.ShortName);
+                            else
+                                classesQuery = classesQuery.OrderByDescending(s => s.ShortName);
+                            break;
+                        case "id":
+                            if (string.IsNullOrEmpty(sortDirection) || sortDirection.ToLower() == "ascending")
+                                classesQuery = classesQuery.OrderBy(s => s.Id);
+                            else
+                                classesQuery = classesQuery.OrderByDescending(s => s.Id);
+                            break;
+                        // Add additional cases for other fields if needed
+                        default:
+                            // Default sorting behavior if sortBy is not recognized
+                            classesQuery = classesQuery.OrderBy(s => s.Id);
+                            break;
+                    }
                 }
 
-                groups = groups.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-                var totalRecords = await _appEFContext.Classes.CountAsync();
+                var totalRecords = await classesQuery.CountAsync();
+
+                var classes = await classesQuery
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
                 var totalPages = Convert.ToInt32(Math.Ceiling(Convert.ToDecimal(totalRecords) / Convert.ToDecimal(pageSize)));
 
-                
+                var classModels = _mapper.Map<List<ClassModel>>(classes);
 
-                if (groups != null)
+                if (classModels != null)
                 {
-                    foreach (ClassModel item in groups)
+                    foreach (ClassModel item in classModels)
                     {
                         item.Students = await _appEFContext.UserClasses
                             .Include(u => u.User)
                             .Where(u => u.ClassId == item.Id)
                             .Select(u => _mapper.Map<UserPublicDataModel>(u.User))
                             .ToListAsync();
-
                     }
                 }
 
-                return Ok(new PagedResponse<List<ClassModel>>(groups, page, pageSize, totalPages, totalRecords));
-
-
-
-
+                return Ok(new PagedResponse<List<ClassModel>>(classModels, page, pageSize, totalPages, totalRecords));
             }
             catch (Exception ex)
             {

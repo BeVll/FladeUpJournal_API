@@ -15,6 +15,7 @@ using System.Linq;
 using FladeUp_API.Models;
 using FladeUp_API.Models.Subject;
 using System;
+using System.Globalization;
 
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -77,32 +78,56 @@ namespace FladeUp_API.Controllers
         }
 
         [HttpGet("")]
-        public async Task<IActionResult> GetSubjects([FromQuery] string? searchQuery, [FromQuery] int page, [FromQuery] int pageSize)
+        public async Task<IActionResult> GetSubjects([FromQuery] string? searchQuery, [FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string? sortBy, [FromQuery] string? sortDirection)
         {
             try
             {
-                var subjects = new List<SubjectEnitity>();
-                if(searchQuery != null)
-                {
-                    subjects = await _appEFContext.Subjects
-                    .OrderBy(s => s.Id)
-                    .Where(s => s.Name.ToLower().Contains(searchQuery.ToLower()) || s.Color.ToLower().Contains(searchQuery.ToLower()) || s.Id.ToString() == searchQuery)
-                    .ToListAsync();
+                var subjectsQuery = _appEFContext.Subjects.AsQueryable();
 
+                if (!string.IsNullOrEmpty(searchQuery))
+                {
+                    var lowerSearchQuery = searchQuery.ToLower();
+
+                    subjectsQuery = subjectsQuery
+                        .Where(s => EF.Functions.Like(s.Name.ToLower(), $"%{lowerSearchQuery}%") ||
+                                    EF.Functions.Like(s.Color.ToLower(), $"%{lowerSearchQuery}%") ||
+                                    EF.Functions.Like(s.Id.ToString(), $"%{lowerSearchQuery}%"));
                 }
 
-                else
+                if (!string.IsNullOrEmpty(sortBy))
                 {
-                    subjects = await _appEFContext.Subjects
-                    .OrderBy(s => s.Id)
-                    .ToListAsync();
+                    switch (sortBy.ToLower())
+                    {
+                        case "id":
+                            if (string.IsNullOrEmpty(sortDirection) || sortDirection.ToLower() == "ascending")
+                                subjectsQuery = subjectsQuery.OrderBy(s => s.Id);
+                            else
+                                subjectsQuery = subjectsQuery.OrderByDescending(s => s.Id);
+                            break;
+                        case "name":
+                            if (string.IsNullOrEmpty(sortDirection) || sortDirection.ToLower() == "ascending")
+                                subjectsQuery = subjectsQuery.OrderBy(s => s.Name);
+                            else
+                                subjectsQuery = subjectsQuery.OrderByDescending(s => s.Name);
+                            break;
+                        // Add additional cases for other fields if needed
+                        default:
+                            // Default sorting behavior if sortBy is not recognized
+                            subjectsQuery = subjectsQuery.OrderBy(s => s.Id);
+                            break;
+                    }
                 }
-                subjects = subjects.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-                var totalRecords = await _appEFContext.Subjects.CountAsync();
+
+                var totalRecords = await subjectsQuery.CountAsync();
+
+                var subjects = await subjectsQuery
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
                 var totalPages = Convert.ToInt32(Math.Ceiling(Convert.ToDecimal(totalRecords) / Convert.ToDecimal(pageSize)));
 
                 return Ok(new PagedResponse<List<SubjectEnitity>>(subjects, page, pageSize, totalPages, totalRecords));
-
             }
             catch (Exception ex)
             {

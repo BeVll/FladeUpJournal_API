@@ -15,6 +15,7 @@ using FladeUp_Api.Constants;
 using Microsoft.EntityFrameworkCore;
 using FladeUp_API.Data.Entities;
 using FladeUp_API.Models;
+using System.Linq.Expressions;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -82,45 +83,71 @@ namespace FladeUp_API.Controllers
         }
 
         [HttpGet("")]
-        public async Task<IActionResult> GetStudents([FromQuery] string? searchQuery, [FromQuery] int page, [FromQuery] int pageSize)
+        public async Task<IActionResult> GetStudents([FromQuery] string? searchQuery, [FromQuery] string? sortBy, [FromQuery] string? sortDirection, [FromQuery] int page, [FromQuery] int pageSize)
         {
             try
             {
-                var students = new List<StudentModel>();
-                if (searchQuery != null)
-                {
-                    students = await _appEFContext.Users
-                        .Include(s => s.UserRoles)
-                        .OrderBy(s => s.Id)
-                        .Where(s => s.UserRoles.Where(r => r.Role.Name == "Student").FirstOrDefault() != null && (s.Firstname.ToLower().Contains(searchQuery.ToLower()) 
-                        || s.Lastname.ToLower().Contains(searchQuery.ToLower())
-                        || (s.Firstname.ToLower() + " " + s.Lastname.ToLower()).Contains(searchQuery.ToLower())
-                        || s.Id.ToString() == searchQuery))
-                        .Select(s => _mapper.Map<StudentModel>(s))
-                        .ToListAsync();
+                var studentsQuery = _appEFContext.Users
+                    .Include(s => s.UserRoles)
+                    .Where(u => u.UserRoles.Any(r => r.Role.Name == "Student"))
+                    .AsQueryable();
 
+                if (!string.IsNullOrEmpty(searchQuery))
+                {
+                    var lowerSearchQuery = searchQuery.ToLower();
+
+                    studentsQuery = studentsQuery
+                        .Where(s => s.Firstname.ToLower().Contains(lowerSearchQuery) ||
+                                    s.Lastname.ToLower().Contains(lowerSearchQuery) ||
+                                    $"{s.Firstname.ToLower()} {s.Lastname.ToLower()}".Contains(lowerSearchQuery) ||
+                                    s.Id.ToString() == lowerSearchQuery);
                 }
 
-                else
+                if (!string.IsNullOrEmpty(sortBy))
                 {
-                    students = await _appEFContext.Users
-                        .Include(s => s.UserRoles)
-                        .Where(u => u.UserRoles.Where(r => r.Role.Name == "Student").FirstOrDefault() != null)
-                        .OrderBy(s => s.Id)
-                        .Select(s => _mapper.Map<StudentModel>(s))
-                        .ToListAsync();
+                    switch (sortBy.ToLower())
+                    {
+                        case "firstname":
+                            studentsQuery = ApplySort(studentsQuery, s => s.Firstname, sortDirection);
+                            break;
+                        case "lastname":
+                            studentsQuery = ApplySort(studentsQuery, s => s.Lastname, sortDirection);
+                            break;
+                        case "id":
+                            studentsQuery = ApplySort(studentsQuery, s => s.Id, sortDirection);
+                            break;
+                        // Add additional cases for other fields if needed
+                        default:
+                            // Default sorting behavior if sortBy is not recognized
+                            studentsQuery = ApplySort(studentsQuery, s => s.Id, sortDirection);
+                            break;
+                    }
                 }
-                students = students.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-                var totalRecords = await _appEFContext.Users.Include(s => s.UserRoles).Where(u => u.UserRoles.Where(r => r.Role.Name == "Student").FirstOrDefault() != null).CountAsync();
+
+                var totalRecords = await studentsQuery.CountAsync();
+
+                var students = await studentsQuery
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(s => _mapper.Map<StudentModel>(s))
+                    .ToListAsync();
+
                 var totalPages = Convert.ToInt32(Math.Ceiling(Convert.ToDecimal(totalRecords) / Convert.ToDecimal(pageSize)));
 
                 return Ok(new PagedResponse<List<StudentModel>>(students, page, pageSize, totalPages, totalRecords));
-
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        private IQueryable<T> ApplySort<T, TKey>(IQueryable<T> query, Expression<Func<T, TKey>> keySelector, string? sortDirection)
+        {
+            if (string.IsNullOrEmpty(sortDirection) || sortDirection.ToLower() == "ascending")
+                return query.OrderBy(keySelector);
+            else
+                return query.OrderByDescending(keySelector);
         }
 
         [Authorize]
