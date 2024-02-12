@@ -392,6 +392,31 @@ namespace FladeUp_API.Controllers
         }
 
 
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var student = await _appEFContext.Users
+                    .Include(s => s.UserRoles)
+                    .Where(u => u.Id == id && u.UserRoles.Any(r => r.Role.Name == "Student"))
+                    .SingleOrDefaultAsync();
+
+                if (student == null)
+                    return NotFound();
+
+                _appEFContext.Remove(student);
+                await _appEFContext.SaveChangesAsync();
+
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
 
         [Authorize]
         [HttpPost("changeAvatar")]
