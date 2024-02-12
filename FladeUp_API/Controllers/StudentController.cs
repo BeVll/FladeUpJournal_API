@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using FladeUp_API.Data.Entities;
 using FladeUp_API.Models;
 using System.Linq.Expressions;
+using FladeUp_Api.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -276,6 +277,121 @@ namespace FladeUp_API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost("create")]
+        public async Task<IActionResult> Signup([FromForm] RegisterRequest model)
+        {
+            try
+            {
+
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                var token = "";
+
+                if (user == null)
+                {
+                    var client = new HttpClient();
+                    string fileName = null;
+                    string extension = ".png";
+
+                    var newUser = new UserEntity()
+                    {
+                        Firstname = model.Firstname,
+                        Lastname = model.Lastname,
+                        Email = model.Email,
+                        UserName = model.Email,
+                        Image = null,
+                        IndetificateCode = model.IndetificateCode,
+                        PlaceOfBirth = model.PlaceOfBirth,
+                        Sex = model.Sex,
+                        National = model.National,
+                        Passport = model.Passport,
+                        IsLightTheme = false,
+                        Instagram = null,
+                        Facebook = null,
+                        Twitter = null,
+                        Status = "Student",
+                        CreatedAt = DateTime.UtcNow,
+                        DateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow),
+                    };
+                    var fileExp = Path.GetExtension(model.Image.FileName);
+                    var dirSave = Path.Combine("images/user_avatars/");
+                    var rndName = Path.GetRandomFileName();
+                    var imageName = dirSave + rndName + fileExp;
+
+                    newUser.Image = imageName;
+
+                    await _cloudStorage.UploadFileAsync(model.Image, imageName);
+
+                    var result = await _userManager.CreateAsync(newUser);
+
+
+
+                    if (result.Succeeded)
+                    {
+                        var id = await _userManager.GetUserIdAsync(newUser);
+                        await _userManager.AddPasswordAsync(newUser, model.Password);
+                        await _userManager.UpdateAsync(newUser);
+
+                        result = await _userManager.AddToRoleAsync(newUser, Roles.Student);
+                        token = await _jwtTokenService.CreateToken(newUser);
+
+                        var confirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+                        var user2 = await _appEFContext.Users.Where(u => u.Email == newUser.Email).SingleOrDefaultAsync();
+                        await _userManager.ConfirmEmailAsync(user2, confirmToken);
+                        var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(confirmToken);
+                        var confirmUrl = System.Convert.ToBase64String(plainTextBytes);
+
+                        //var body = @"
+                        //                <html lang=""en"">
+                        //                    <body style=""padding: 0; margin: 0; font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;"">
+                        //                      <div style=""background-color: #121212;justify-content: center; align-items: center; padding: 50px 10%; color: #fff;"">
+                        //                        <div style="" width: 100%; background-color: #1E1E1E; align-items: start; justify-content: start; padding: 25px; border-radius: 10px;"">
+                        //                          <div style=""font-size: 24px; color: #f2f0f0; font-weight: bold;"">
+                        //                            Please confirm your email
+                        //                          </div>
+                        //                          <div style=""color: #f2f0f0; font-size: 20px;"">
+                        //                            Welcome " + newUser.Firstname + @" to FladeUp!
+                        //                          </div>
+                        //                          <div class=""buttonBlock"" style=""width: 100%; display: flex; justify-content: start; margin-top: 25px;"">
+                        //                            <a class=""btn"" href=""http://localhost:5173/confirmEmail/" + user2.Id + "?token=" + confirmUrl + @""" style=""border-radius: 10px; padding: 8px 20px; transition: 0.2s; border: 1px solid #2EBF91; background-color: #353535; color: #f2f0f0; font-weight: bold; cursor: pointer;"">Click to confirm</a>
+                        //                          </div>
+                        //                        </div>
+                        //                      </div>
+                        //                    </body>
+
+                        //                </html>";
+                        //_emailService.SendMailAsync("FladeUp | Confirmation link", body, newUser.Email);
+                        return Ok(confirmToken);
+                    }
+                }
+
+                //http://localhost:5173/confirmEmail?token="+ confirmToken.Result.ToString() + 
+
+                return BadRequest("Email is registered");
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("")]
+        public async Task<IActionResult> Create()
+        {
+            try
+            {
+                
+                return BadRequest("User not found!");
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
 
         [Authorize]
         [HttpPost("changeAvatar")]

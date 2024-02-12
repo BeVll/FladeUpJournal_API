@@ -4,11 +4,11 @@
     {
         public string Email { get; set; }
         public string Password { get; set; }
-        public string PasswordConfirm { get; set; }
+        public string ConfirmPassword { get; set; }
 
         public string Firstname { get; set; }
         public string Lastname { get; set; }
-        public string? Image { get; set; }
+        public IFormFile Image { get; set; }
         public string? IndetificateCode { get; set; }
         public DateOnly DateOfBirth { get; set; }
         public string PlaceOfBirth { get; set; }
