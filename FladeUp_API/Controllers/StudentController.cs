@@ -17,6 +17,8 @@ using FladeUp_API.Data.Entities;
 using FladeUp_API.Models;
 using System.Linq.Expressions;
 using FladeUp_Api.Services;
+using FladeUp_API.Requests.Class;
+using FladeUp_API.Requests.Student;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -381,13 +383,29 @@ namespace FladeUp_API.Controllers
             }
         }
 
-        [HttpPost("")]
-        public async Task<IActionResult> Create()
+        [HttpPost("addToGroups")]
+        public async Task<IActionResult> AddToGroups([FromForm] AddToGroupsRequest model)
         {
             try
             {
-                
-                return BadRequest("User not found!");
+                foreach (var item in model.GroupIds)
+                {
+                    var checkExist = await _appEFContext.UserClasses.Where(g => g.ClassId == item && g.UserId == model.StudentId).ToListAsync();
+
+                    if (checkExist.Count > 0)
+                        return BadRequest("User exist!");
+
+                    var groupAddStudent = new UserClassEntity()
+                    {
+                        UserId = model.StudentId,
+                        ClassId = item,
+
+                    };
+                    _appEFContext.Add(groupAddStudent);
+                    
+                }
+                await _appEFContext.SaveChangesAsync();
+                return Ok();
 
             }
             catch (Exception ex)
