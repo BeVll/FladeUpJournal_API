@@ -1,4 +1,5 @@
 ﻿using FladeUp_Api.Data.Entities.Identity;
+using FladeUp_API.Models.Class;
 using System.ComponentModel.DataAnnotations;
 
 namespace FladeUp_API.Models.User
@@ -6,6 +7,7 @@ namespace FladeUp_API.Models.User
     public class StudentDetailModel
     {
         public int Id { get; set; }
+        public string Email { get; set; }
         public string Firstname { get; set; }
         public string Lastname { get; set; }
         public string Image { get; set; }
@@ -33,6 +35,7 @@ namespace FladeUp_API.Models.User
         public string? MailPostalCode { get; set; }
 
         public string? WorkExp { get; set; }
+        public List<ClassModel> Groups { get; set; }
         public virtual ICollection<UserRoleEntity> UserRoles { get; set; }
     }
 }

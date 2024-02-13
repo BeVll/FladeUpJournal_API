@@ -50,6 +50,11 @@ namespace FladeUp_API.Controllers
                     _appEFContext.Users.Where(
                         u => u.Id == id && u.UserRoles.Where(r => r.Role.Name == "Student").FirstOrDefault() != null)
                     .SingleOrDefault());
+
+                student.Groups = await _appEFContext.UserClasses
+                    .Where(g => g.UserId == id)
+                    .Select(g => _mapper.Map<ClassModel>(g.Class))
+                    .ToListAsync();
                 return Ok(student);
 
             }
