@@ -414,6 +414,29 @@ namespace FladeUp_API.Controllers
             }
         }
 
+        [HttpDelete("removeFromGroup")]
+        public async Task<IActionResult> RemoveFromGroup([FromQuery] int studentId, [FromQuery] int groupId)
+        {
+            try
+            {
+                var studentGroup = await _appEFContext.UserClasses.Where(g => g.ClassId == groupId && g.UserId == studentId).FirstOrDefaultAsync();
+
+                if (studentGroup == null)
+                    return BadRequest("User doesn`t exist in group!");
+
+                    
+                _appEFContext.Remove(studentGroup);
+                await _appEFContext.SaveChangesAsync();
+                return Ok();
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
 
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> Delete(int id)
