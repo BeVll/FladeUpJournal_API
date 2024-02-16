@@ -254,7 +254,7 @@ namespace FladeUp_API.Controllers
                 groupEntity.ShortName = model.ShortName;
                 groupEntity.FormOfStudy = model.FormOfStudy;
                 groupEntity.YearOfStart = model.YearOfEnd;
-                groupEntity.UpdatedAt = DateTime.Now;
+                groupEntity.UpdatedAt = DateTime.UtcNow;
 
                 _appEFContext.Update(groupEntity);
                 await _appEFContext.SaveChangesAsync();
