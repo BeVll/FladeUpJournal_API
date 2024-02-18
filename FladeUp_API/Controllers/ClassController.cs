@@ -54,6 +54,14 @@ namespace FladeUp_API.Controllers
                     .Select(u => _mapper.Map<UserPublicDataModel>(u.User))
                     .ToListAsync();
 
+                classModel.Subjects = await _appEFContext.ClassSubjects
+                   .Include(u => u.Subject)
+                   .Include(u => u.Teacher)
+                   .Include(u => u.Class)
+                   .Where(u => u.ClassId == id)
+                   .Select(u => _mapper.Map<SubjectModel>(u.Subject))
+                   .ToListAsync();
+
                 return Ok(classModel);
 
             }

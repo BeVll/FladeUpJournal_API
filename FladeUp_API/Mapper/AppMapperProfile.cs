@@ -5,6 +5,7 @@ using FladeUp_API.Models;
 using FladeUp_API.Models.Class;
 using FladeUp_API.Models.Event;
 using FladeUp_API.Models.Students;
+using FladeUp_API.Models.Subject;
 using FladeUp_API.Models.User;
 
 namespace FladeUp_Api.Mapper
@@ -18,6 +19,7 @@ namespace FladeUp_Api.Mapper
             CreateMap<UserEntity, UserPublicDataModel>();
             CreateMap<ClassEntity, ClassModel>();
             CreateMap<EventEnitity, EventModel>();
+            CreateMap<SubjectEnitity, SubjectModel>();
         }
        
     }
