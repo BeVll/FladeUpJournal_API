@@ -309,7 +309,7 @@ namespace FladeUp_API.Controllers
             }
         }
 
-        [HttpPut("updateAdresses/{id}")]
+        [HttpPut("updateAddresses/{id}")]
         public async Task<IActionResult> UpdateAdresses(int id, [FromForm] UpdateAdresses model)
         {
             try
