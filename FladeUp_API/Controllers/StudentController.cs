@@ -90,6 +90,25 @@ namespace FladeUp_API.Controllers
             }
         }
 
+        [HttpGet("addresses/{id}")]
+        public async Task<IActionResult> GetAdressesForStudent(int id)
+        {
+            try
+            {
+                var userAdresses = await _appEFContext.UserAdresses.Where(r => r.UserId == id).FirstOrDefaultAsync();
+
+                if (userAdresses == null)
+                    return NotFound();
+
+                return Ok(userAdresses);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpGet("")]
         public async Task<IActionResult> GetStudents([FromQuery] string? searchQuery, [FromQuery] string? sortBy, [FromQuery] string? sortDirection, [FromQuery] int page, [FromQuery] int pageSize)
         {
@@ -158,132 +177,8 @@ namespace FladeUp_API.Controllers
                 return query.OrderByDescending(keySelector);
         }
 
-        [Authorize]
-        [HttpGet("userProfile")]
-        public async Task<IActionResult> GetUserProfile()
-        {
-            try
-            {
-                var email = User.FindFirst(ClaimTypes.Email).Value;
-                var user = await _userManager.Users.SingleOrDefaultAsync(u => u.Email == email);
-
-
-
-                if (user != null)
-                {
-                    var userModel = _mapper.Map<StudentDetailModel>(user);
-
-                    var adresses = await _appEFContext.UserAdresses.Where(a => a.UserId == user.Id).SingleOrDefaultAsync();
-
-                    if (adresses != null)
-                    {
-                        userModel.Country = adresses.Country;
-                        userModel.City = adresses.City;
-                        userModel.Street = adresses.Street;
-                        userModel.PostalCode = adresses.PostalCode;
-
-                        userModel.MailCountry = adresses.MailCountry;
-                        userModel.MailCity = adresses.MailCity;
-                        userModel.MailStreet = adresses.MailStreet;
-                        userModel.MailPostalCode = adresses.MailPostalCode;
-                    }
-
-
-
-                    return Ok(userModel);
-                }
-
-
-                else
-                    return BadRequest();
-
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [Authorize]
-        [HttpGet("getClasses")]
-        public async Task<IActionResult> GetClasses()
-        {
-            try
-            {
-                var email = User.FindFirst(ClaimTypes.Email).Value;
-                var user = await _userManager.Users.SingleOrDefaultAsync(u => u.Email == email);
-
-
-
-                if (user != null)
-                {
-                    var classes = await _appEFContext.UserClasses
-                        .Where(c => c.UserId == user.Id)
-                        .Include(c => c.Class)
-                        .Select(c => _mapper.Map<ClassModel>(c.Class))
-                        .ToListAsync();
-
-                    foreach (var classEntity in classes)
-                    {
-
-                        var subjects = await _appEFContext.ClassSubjects
-                       .Where(s => s.ClassId == classEntity.Id)
-                       .Include(s => s.Subject)
-                       .Include(s => s.Teacher)
-                       .ToListAsync();
-
-                        var result = new List<SubjectModel>();
-
-                        foreach (var item in subjects)
-                        {
-                            result.Add(new SubjectModel
-                            {
-                                Id = item.SubjectId,
-                                Name = item.Subject.Name,
-                                Teacher = _mapper.Map<UserPublicDataModel>(item.Teacher),
-                                Description = item.Description,
-                                Color = item.Subject.Color,
-                            });
-                        }
-
-
-                        classEntity.Subjects = result;
-                    }
-
-                    return Ok(classes);
-                }
-
-
-                else
-                    return BadRequest();
-
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-
-
-        [Authorize]
-        [HttpGet("GetAuthenticatedUser")]
-        public async Task<IActionResult> GetAuthenticatedUser()
-        {
-            try
-            {
-                var email = User.FindFirst("Id").Value;
-                var user = await _userManager.Users.SingleOrDefaultAsync(u => u.Id == Convert.ToInt32(email));
-
-                var res = _mapper.Map<StudentDetailModel>(_appEFContext.Users.Where(u => u.Id == user.Id).SingleOrDefault());
-                return Ok(res);
-
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
+        
+      
 
         [HttpPost("create")]
         public async Task<IActionResult> Signup([FromForm] RegisterRequest model)
@@ -404,6 +299,37 @@ namespace FladeUp_API.Controllers
                     _appEFContext.Add(groupAddStudent);
                     
                 }
+                await _appEFContext.SaveChangesAsync();
+                return Ok();
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("updateAdresses/{id}")]
+        public async Task<IActionResult> UpdateAdresses(int id, [FromForm] UpdateAdresses model)
+        {
+            try
+            {
+                var userAdresses = await _appEFContext.UserAdresses.Where(u => u.UserId == id).FirstOrDefaultAsync();
+
+                if (userAdresses == null)
+                    return NotFound();
+
+                userAdresses.Country = model.Country;
+                userAdresses.City = model.City;
+                userAdresses.Street = model.Street;
+                userAdresses.PostalCode = model.PostalCode;
+                userAdresses.MailCountry = model.MailCountry;
+                userAdresses.MailCity = model.MailCity;
+                userAdresses.MailStreet = model.MailStreet;
+                userAdresses.MailPostalCode = model.MailPostalCode;
+                userAdresses.UpdatedAt = DateTime.UtcNow;
+
+                _appEFContext.Update(userAdresses);
                 await _appEFContext.SaveChangesAsync();
                 return Ok();
 

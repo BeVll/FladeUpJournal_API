@@ -68,7 +68,7 @@ namespace FladeUp_API.Controllers
                 var subjects = await _appEFContext.Subjects
                     .ToListAsync();
 
-                return Ok(new Response<List<SubjectEnitity>>(subjects));
+                return Ok(new List<SubjectEnitity>(subjects));
 
             }
             catch (Exception ex)
