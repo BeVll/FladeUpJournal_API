@@ -1,5 +1,7 @@
 ﻿using FladeUp_Api.Data.Entities.Identity;
 using FladeUp_API.Models.Class;
+using FladeUp_API.Models.Nationality;
+using FladeUp_API.Models.Sex;
 using System.ComponentModel.DataAnnotations;
 
 namespace FladeUp_API.Models.User
@@ -14,8 +16,8 @@ namespace FladeUp_API.Models.User
         public string? IndetificateCode { get; set; }
         public DateOnly DateOfBirth { get; set; }
         public string PlaceOfBirth { get; set; }
-        public string Sex { get; set; }
-        public string National { get; set; }
+        public GenderModel Gender { get; set; }
+        public NationalityModel Nationality { get; set; }
         public string? Passport { get; set; }
         public bool IsLightTheme { get; set; }
         public string? Instagram { get; set; }

@@ -19,6 +19,7 @@ using System.Linq.Expressions;
 using FladeUp_Api.Services;
 using FladeUp_API.Requests.Class;
 using FladeUp_API.Requests.Student;
+using FladeUp_API.Constants;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -48,16 +49,46 @@ namespace FladeUp_API.Controllers
         {
             try
             {
-                var student = _mapper.Map<StudentDetailModel>(
-                    _appEFContext.Users.Where(
-                        u => u.Id == id && u.UserRoles.Where(r => r.Role.Name == "Student").FirstOrDefault() != null)
-                    .SingleOrDefault());
 
-                student.Groups = await _appEFContext.UserClasses
+                var studentEntity = _appEFContext.Users.Where(
+                        u => u.Id == id && u.UserRoles.Where(r => r.Role.Name == "Student").FirstOrDefault() != null)
+                    .SingleOrDefault();
+
+                var studentResult = _mapper.Map<StudentDetailModel>(studentEntity);
+
+                studentResult.Gender = Gender.All.Where(g => g.Id == studentEntity.GenderId).First();
+                studentResult.Nationality = Nationality.All.Where(g => g.Id == studentEntity.NationalityId).First();
+
+                studentResult.Groups = await _appEFContext.UserClasses
                     .Where(g => g.UserId == id)
                     .Select(g => _mapper.Map<ClassModel>(g.Class))
                     .ToListAsync();
-                return Ok(student);
+                return Ok(studentResult);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("editStudent/{id}")]
+        public async Task<IActionResult> GetEditStudent(int id)
+        {
+            try
+            {
+                var studentEntity = _appEFContext.Users.Where(
+                        u => u.Id == id && u.UserRoles.Where(r => r.Role.Name == "Student").FirstOrDefault() != null)
+                    .SingleOrDefault();
+
+                var studentResult = _mapper.Map<StudentEditModel>(studentEntity);
+
+              
+                studentResult.Gender = Gender.All.Where(g => g.Id == studentEntity.GenderId).First();
+                studentResult.Genders = Gender.All;
+                studentResult.Nationality = Nationality.All.Where(g => g.Id == studentEntity.NationalityId).First();
+                studentResult.Nationalities = Nationality.All;
+                return Ok(studentResult);
 
             }
             catch (Exception ex)
@@ -204,8 +235,8 @@ namespace FladeUp_API.Controllers
                         Image = null,
                         IndetificateCode = model.IndetificateCode,
                         PlaceOfBirth = model.PlaceOfBirth,
-                        Sex = model.Sex,
-                        National = model.National,
+                        GenderId = model.Sex,
+                        NationalityId = model.National,
                         Passport = model.Passport,
                         IsLightTheme = false,
                         Instagram = null,
@@ -329,6 +360,8 @@ namespace FladeUp_API.Controllers
                 userAdresses.MailPostalCode = model.MailPostalCode;
                 userAdresses.UpdatedAt = DateTime.UtcNow;
 
+
+
                 _appEFContext.Update(userAdresses);
                 await _appEFContext.SaveChangesAsync();
                 return Ok();
@@ -340,6 +373,50 @@ namespace FladeUp_API.Controllers
             }
         }
 
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> Update(int id, [FromForm] UpdateStudent model)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(id.ToString());
+
+                if (user == null)
+                    return NotFound();
+
+                user.Firstname = model.Firstname;
+                user.Lastname = model.Lastname;
+                user.IndetificateCode = model.IndetificateCode;
+                user.DateOfBirth = model.DateOfBirth;
+                user.PlaceOfBirth = model.PlaceOfBirth;
+                user.GenderId = model.GenderId;
+                user.NationalityId = model.NationalityId;
+                user.WorkExp = model.WorkExp;
+                user.BankAccount = model.BankAccount;
+                user.Status = model.Status;
+
+                if (model.NewImage != null)
+                {
+                    var fileExp = Path.GetExtension(model.NewImage.FileName);
+                    var dirSave = Path.Combine("images/user_avatars/");
+                    var rndName = Path.GetRandomFileName();
+                    var imageName = dirSave + rndName + fileExp;
+
+                    user.Image = imageName;
+
+                    await _cloudStorage.UploadFileAsync(model.NewImage, imageName);
+                }
+
+                _appEFContext.Update(user);
+                await _appEFContext.SaveChangesAsync();
+                return Ok();
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        
         [HttpDelete("removeFromGroup")]
         public async Task<IActionResult> RemoveFromGroup([FromQuery] int studentId, [FromQuery] int groupId)
         {

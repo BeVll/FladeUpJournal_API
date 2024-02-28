@@ -12,8 +12,8 @@
         public string? IndetificateCode { get; set; }
         public DateOnly DateOfBirth { get; set; }
         public string PlaceOfBirth { get; set; }
-        public string Sex { get; set; }
-        public string National { get; set; }
+        public int Sex { get; set; }
+        public int National { get; set; }
         public string? Passport { get; set; }
         public bool IsLightTheme { get; set; }
         public string? Instagram { get; set; }

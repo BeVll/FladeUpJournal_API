@@ -11,8 +11,8 @@ namespace FladeUp_Api.Data.Entities.Identity
         public string? IndetificateCode { get; set; }
         public DateOnly DateOfBirth { get; set; }
         public string PlaceOfBirth { get; set; }
-        public string Sex { get; set; }
-        public string National { get; set; }
+        public int GenderId { get; set; }
+        public int NationalityId { get; set; }
         public string? Passport { get; set; }
         public bool IsLightTheme { get; set; }
         public string? Instagram { get; set; }
