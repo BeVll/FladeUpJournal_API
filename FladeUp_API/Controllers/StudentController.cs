@@ -50,8 +50,7 @@ namespace FladeUp_API.Controllers
             try
             {
 
-                var studentEntity = _appEFContext.Users.Where(
-                        u => u.Id == id && u.UserRoles.Where(r => r.Role.Name == "Student").FirstOrDefault() != null)
+                var studentEntity = _appEFContext.Users.Where(u => u.Id == id && u.UserRoles.Where(r => r.Role.Name == "Student").FirstOrDefault() != null)
                     .SingleOrDefault();
 
                 var studentResult = _mapper.Map<StudentDetailModel>(studentEntity);
@@ -150,6 +149,8 @@ namespace FladeUp_API.Controllers
                     .Where(u => u.UserRoles.Any(r => r.Role.Name == "Student"))
                     .AsQueryable();
 
+
+
                 if (!string.IsNullOrEmpty(searchQuery))
                 {
                     var lowerSearchQuery = searchQuery.ToLower();
@@ -157,7 +158,7 @@ namespace FladeUp_API.Controllers
                     studentsQuery = studentsQuery
                         .Where(s => s.Firstname.ToLower().Contains(lowerSearchQuery) ||
                                     s.Lastname.ToLower().Contains(lowerSearchQuery) ||
-                                    $"{s.Firstname.ToLower()} {s.Lastname.ToLower()}".Contains(lowerSearchQuery) ||
+                                    (s.Firstname.ToLower() + " " + s.Lastname.ToLower()).Contains(lowerSearchQuery) ||
                                     s.Id.ToString() == lowerSearchQuery);
                 }
 
@@ -189,6 +190,7 @@ namespace FladeUp_API.Controllers
                     .Take(pageSize)
                     .Select(s => _mapper.Map<StudentModel>(s))
                     .ToListAsync();
+
 
                 var totalPages = Convert.ToInt32(Math.Ceiling(Convert.ToDecimal(totalRecords) / Convert.ToDecimal(pageSize)));
 
