@@ -139,6 +139,36 @@ namespace FladeUp_API.Controllers
             }
         }
 
+        [HttpGet("genders")]
+        public async Task<IActionResult> GetGenders()
+        {
+            try
+            {
+
+                return Ok(Gender.All);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("nationalities")]
+        public async Task<IActionResult> GetNationalities()
+        {
+            try
+            {
+
+                return Ok(Nationality.All);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpGet("")]
         public async Task<IActionResult> GetStudents([FromQuery] string? searchQuery, [FromQuery] string? sortBy, [FromQuery] string? sortDirection, [FromQuery] int page, [FromQuery] int pageSize)
         {
@@ -237,8 +267,8 @@ namespace FladeUp_API.Controllers
                         Image = null,
                         IndetificateCode = model.IndetificateCode,
                         PlaceOfBirth = model.PlaceOfBirth,
-                        GenderId = model.Sex,
-                        NationalityId = model.National,
+                        GenderId = model.GenderId,
+                        NationalityId = model.NationalityId,
                         Passport = model.Passport,
                         IsLightTheme = false,
                         Instagram = null,
