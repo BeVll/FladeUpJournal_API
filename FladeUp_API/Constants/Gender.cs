@@ -9,7 +9,7 @@ namespace FladeUp_API.Constants
             {
                 new GenderModel { Id = 1, NameEn = "Male", NameUk = "Чоловіча" },
                 new GenderModel { Id = 2, NameEn = "Female", NameUk = "Жіноча" },
-                new GenderModel { Id = 2, NameEn = "Other", NameUk = "Інша" },
+                new GenderModel { Id = 3, NameEn = "Other", NameUk = "Інша" },
             };
 
     }

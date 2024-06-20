@@ -35,6 +35,8 @@ namespace FladeUp_Api.Data
         public DbSet<GradeEntity> Grades { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            
+
             base.OnModelCreating(builder);
             builder.Entity<UserRoleEntity>(ur =>
             {

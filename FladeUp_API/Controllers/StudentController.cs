@@ -20,6 +20,7 @@ using FladeUp_Api.Services;
 using FladeUp_API.Requests.Class;
 using FladeUp_API.Requests.Student;
 using FladeUp_API.Constants;
+using FladeUp_API.Data.Entities.Identity;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -294,6 +295,14 @@ namespace FladeUp_API.Controllers
                     if (result.Succeeded)
                     {
                         var id = await _userManager.GetUserIdAsync(newUser);
+
+                        UserAdresses userAdresses = new UserAdresses
+                        {
+                            UserId = Convert.ToInt32(id)
+                        };
+
+                        _appEFContext.UserAdresses.Add(userAdresses);
+                        await _appEFContext.SaveChangesAsync();
                         await _userManager.AddPasswordAsync(newUser, model.Password);
                         await _userManager.UpdateAsync(newUser);
 

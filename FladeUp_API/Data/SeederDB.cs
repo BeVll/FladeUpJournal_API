@@ -1,12 +1,13 @@
 ﻿using FladeUp_Api.Constants;
 using FladeUp_Api.Data.Entities.Identity;
+using FladeUp_API.Data.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 
 namespace FladeUp_Api.Data
 {
     public static class SeederDB
     {
-        public static void SeedData(this IApplicationBuilder app)
+        public static async void SeedData(this IApplicationBuilder app)
         {
             using (var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
@@ -14,7 +15,7 @@ namespace FladeUp_Api.Data
                 var context = service.GetRequiredService<AppEFContext>();
                 var userNamager = service.GetRequiredService<UserManager<UserEntity>>();
                 var roleNamager = service.GetRequiredService<RoleManager<RoleEntity>>();
-                // context.Database.Migrate(); //автоматично запускає міграції на БД
+                context.Database.EnsureCreated();
 
 
                 if (!context.Roles.Any())
@@ -28,7 +29,39 @@ namespace FladeUp_Api.Data
                         var result = roleNamager.CreateAsync(role).Result;
                     }
                 }
+                if (!context.Users.Any())
+                {
+                    
+                    
+                        var user = new UserEntity
+                        {
+                            Firstname = "Admin",
+                            Lastname = "Admin",
+                            DateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow),
+                            PlaceOfBirth = "None",
+                            GenderId = 3,
+                            NationalityId = 1,
+                            IsLightTheme = false,
+                            Email = "admin@gmail.com",
+                            UserName = "admin@gmail.com",
+                            Status = "Admin", 
+                            EmailConfirmed = true
+                        };
+                        var result = userNamager.CreateAsync(user).Result;
 
+                    UserAdresses userAdresses = new UserAdresses
+                    {
+                        UserId = user.Id
+                    };
+
+                    context.UserAdresses.Add(userAdresses);
+                   
+
+                    await userNamager.AddToRoleAsync(user, "Admin");
+                    await userNamager.AddPasswordAsync(user, "admin");
+                    await userNamager.UpdateAsync(user);
+                    await context.SaveChangesAsync();
+                }
 
 
             }
